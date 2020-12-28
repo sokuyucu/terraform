@@ -11,15 +11,15 @@ output "kubeone_hosts" {
 
   value = {
     control_plane = {
-      cluster_name         = var.kae_cluster_name
+      cluster_name         = var.cluster_name
       cloud_provider       = "hetzner"
       private_address      = hcloud_server_network.control_plane.*.ip
       public_address       = hcloud_server.control_plane.*.ipv4_address
       network_id           = hcloud_network.net.id
-      ssh_agent_socket     = var.kae_ssh_agent_socket
-      ssh_port             = var.kae_ssh_port
-      ssh_private_key_file = var.kae_ssh_private_key_file
-      ssh_user             = var.kae_ssh_username
+      ssh_agent_socket     = var.ssh_agent_socket
+      ssh_port             = var.ssh_port
+      ssh_private_key_file = var.ssh_private_key_file
+      ssh_user             = var.ssh_username
     }
   }
 }
@@ -30,11 +30,11 @@ output "kubeone_workers" {
   value = {
     # following outputs will be parsed by kubeone and automatically merged into
     # corresponding (by name) worker definition
-    "${var.kae_cluster_name}-pool1" = {
-      replicas = var.kae_workers_replicas
+    "${var.cluster_name}-pool1" = {
+      replicas = var.workers_replicas
       providerSpec = {
-        sshPublicKeys   = [file(var.kae_ssh_public_key_file)]
-        operatingSystem = var.kae_worker_os
+        sshPublicKeys   = [file(var.ssh_public_key_file)]
+        operatingSystem = var.worker_os
         operatingSystemSpec = {
           distUpgradeOnBoot = false
         }
@@ -42,16 +42,16 @@ output "kubeone_workers" {
           # provider specific fields:
           # see example under `cloudProviderSpec` section at:
           # https://github.com/kubermatic/machine-controller/blob/master/examples/hetzner-machinedeployment.yaml
-          serverType = var.kae_worker_type
-          location   = var.kae_datacenter
-          image      = var.kae_image
+          serverType = var.worker_type
+          location   = var.datacenter
+          image      = var.image
           networks = [
             hcloud_network.net.id
           ]
           # Datacenter (optional)
           # datacenter = ""
           labels = {
-            "${var.kae_cluster_name}-workers" = "pool1"
+            "${var.cluster_name}-workers" = "pool1"
           }
         }
       }
