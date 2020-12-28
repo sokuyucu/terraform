@@ -1,23 +1,23 @@
 
 provider "hcloud" {
-	token = var.kae_hcloud_token
+	token = var.hcloud_token
 }
 
 resource "hcloud_ssh_key" "kubeone" {
-  name       = "kubeone-${var.kae_cluster_name}"
-  public_key = file(var.kae_ssh_public_key_file)
+  name       = "kubeone-${var.cluster_name}"
+  public_key = file(var.ssh_public_key_file)
 }
 
 resource "hcloud_network" "net" {
-  name     = var.kae_cluster_name
-  ip_range = var.kae_ip_range
+  name     = var.cluster_name
+  ip_range = var.ip_range
 }
 
 resource "hcloud_network_subnet" "kubeone" {
   network_id   = hcloud_network.net.id
   type         = "server"
-  network_zone = var.kae_network_zone
-  ip_range     = var.kae_ip_range
+  network_zone = var.network_zone
+  ip_range     = var.ip_range
 }
 
 resource "hcloud_server_network" "control_plane" {
@@ -27,11 +27,11 @@ resource "hcloud_server_network" "control_plane" {
 }
 
 resource "hcloud_server" "control_plane" {
-  count       = var.kae_control_plane_replicas
-  name        = "${var.kae_cluster_name}-kaemaster-${count.index + 1}"
-  server_type = var.kae_control_plane_type
-  image       = var.kae_image
-  location    = var.kae_datacenter
+  count       = var.control_plane_replicas
+  name        = "${var.cluster_name}-master-${count.index + 1}"
+  server_type = var.control_plane_type
+  image       = var.image
+  location    = var.datacenter
 
 
 
@@ -40,7 +40,7 @@ resource "hcloud_server" "control_plane" {
   ]
 
   labels = {
-    "kubeone_cluster_name" = var.kae_cluster_name
+    "kubeone_cluster_name" = var.cluster_name
     "role"                 = "api"
   }
 }
@@ -54,12 +54,12 @@ resource "hcloud_load_balancer_network" "load_balancer" {
 }
 
 resource "hcloud_load_balancer" "load_balancer" {
-  name               = "${var.kae_cluster_name}-kaelb"
-  load_balancer_type = var.kae_lb_type
-  location           = var.kae_datacenter
+  name               = "${var.cluster_name}-lb"
+  load_balancer_type = var.lb_type
+  location           = var.datacenter
 
   labels = {
-    "kubeone_cluster_name" = var.kae_cluster_name
+    "kubeone_cluster_name" = var.cluster_name
     "role"                 = "lb"
   }
 }
